@@ -6,11 +6,11 @@ import (
 )
 
 type TrackedResult struct {
-	Timestamp int64       `json:"timestamp,omitempty"`
-	IP        string      `json:"ip,omitempty"`
-	UserAgent string      `json:"user_agent,omitempty"`
-	Message   string      `json:"message,omitempty"`
-	Header    http.Header `json:"header,omitempty"`
+	Timestamp int64       `json:"timestamp"`
+	IP        string      `json:"ip"`
+	UserAgent string      `json:"user_agent"`
+	Message   string      `json:"message"`
+	Header    http.Header `json:"header"`
 }
 
 // TrackedRequest 存储请求的相关信息
