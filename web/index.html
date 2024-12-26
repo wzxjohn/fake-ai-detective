@@ -209,7 +209,7 @@
                 if ((data.data) && (data.data.finished)) {
                     polling = false
                 }
-                await new Promise(resolve => setTimeout(resolve, 10000));
+                await new Promise(resolve => setTimeout(resolve, 2000));
             } catch (error) {
                 console.error('Polling error:', error);
                 polling = false;
