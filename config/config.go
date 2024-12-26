@@ -14,6 +14,7 @@ type Config struct {
 	APIPrefix      string   `mapstructure:"api_prefix"`
 	ImagePrefix    string   `mapstructure:"image_prefix"`
 	TrustedProxies []string `mapstructure:"trusted_proxies"`
+	OpenAICIDRs    []string `mapstructure:"openai_cidrs"`
 }
 
 var (
