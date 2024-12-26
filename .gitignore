@@ -9,4 +9,5 @@
 !/.gitignore
 !/.dockerignore
 !*.yaml
+!*.yml
 !*.html
