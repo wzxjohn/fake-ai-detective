@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake AI Detective</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.7/dayjs.min.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .input-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        label {
+            margin-right: 5px;
+        }
+
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .results-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        th {
+            background: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .header-toggle {
+            color: #2196F3;
+            cursor: pointer;
+        }
+
+        .header-content {
+            display: none;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .header-content.show {
+            display: block;
+        }
+
+        .timestamp {
+            white-space: nowrap;
+        }
+
+        .ip {
+            color: #2196F3;
+        }
+
+        .user-agent {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+<div class="input-section">
+    <form id="requestForm">
+        <div class="form-group">
+            <label for="url">URL:</label>
+            <input type="text" id="url" name="url" required>
+        </div>
+        <div class="form-group">
+            <label for="key">Key:</label>
+            <input type="text" id="key" name="key" required>
+        </div>
+        <button type="submit" id="submitBtn">提交</button>
+    </form>
+</div>
+
+<div class="results-section">
+    <table>
+        <thead>
+        <tr>
+            <th>时间</th>
+            <th>IP</th>
+            <th>User Agent</th>
+            <th>Message</th>
+            <th>Headers</th>
+        </tr>
+        </thead>
+        <tbody id="results">
+        <!-- Results will be dynamically added here -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    let polling = false;
+    let currentId = null;
+
+    document.getElementById('requestForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const form = e.target;
+        const submitBtn = form.querySelector('button');
+        const inputs = form.querySelectorAll('input');
+
+        submitBtn.disabled = true;
+        inputs.forEach(input => input.disabled = true);
+
+        try {
+            const response = await fetch('{{ .APIPrefix }}/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    url: form.url.value,
+                    key: form.key.value
+                })
+            });
+
+            const data = await response.json();
+            if (data.data) {
+                currentId = data.data;
+                startPolling(currentId);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            submitBtn.disabled = false;
+            inputs.forEach(input => input.disabled = false);
+        }
+    });
+
+    function startPolling(id) {
+        if (polling) return;
+        polling = true;
+        pollResults(id);
+    }
+
+    async function pollResults(id) {
+        await new Promise(resolve => setTimeout(resolve, 30000));
+
+        while (polling) {
+            try {
+                const response = await fetch(`{{ .APIPrefix }}/result/${id}`);
+                const data = await response.json();
+
+                if ((data.data) && (data.data.results)) {
+                    updateResults(data.data.results);
+                }
+
+                if ((data.data) && (data.data.finished)) {
+                    polling = false
+                }
+                await new Promise(resolve => setTimeout(resolve, 10000));
+            } catch (error) {
+                console.error('Polling error:', error);
+                polling = false;
+            }
+        }
+    }
+
+    function updateResults(results) {
+        const tbody = document.getElementById('results');
+        tbody.innerHTML = '';
+
+        results.forEach(result => {
+            const tr = document.createElement('tr');
+            const timestamp = dayjs.unix(result.timestamp).format('YYYY-MM-DD HH:mm:ss');
+
+            tr.innerHTML = `
+                    <td class="timestamp">${timestamp}</td>
+                    <td class="ip">${result.ip}</td>
+                    <td class="user-agent" title="${result.user_agent}">${result.user_agent}</td>
+                    <td>${result.message}</td>
+                    <td>
+                        <div class="header-toggle">显示 Headers ▼</div>
+                        <div class="header-content">
+                            ${JSON.stringify(result.header, null, 2)}
+                        </div>
+                    </td>
+                `;
+
+            const toggle = tr.querySelector('.header-toggle');
+            const headerContent = tr.querySelector('.header-content');
+
+            toggle.addEventListener('click', () => {
+                headerContent.classList.toggle('show');
+                toggle.textContent = headerContent.classList.contains('show') ?
+                    '隐藏 Headers ▲' : '显示 Headers ▼';
+            });
+
+            tbody.appendChild(tr);
+        });
+    }
+</script>
+</body>
+</html>

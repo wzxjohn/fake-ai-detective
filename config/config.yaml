@@ -1,0 +1,10 @@
+domain: detect.example.com
+api_prefix: /api
+image_prefix: /img
+trusted_proxies:
+  - 127.0.0.0/8
+  - 10.0.0.0/8
+  - 172.16.0.0/12
+  - 192.0.0.0/24
+  - 198.18.0.0/15
+  - 192.168.0.0/16
