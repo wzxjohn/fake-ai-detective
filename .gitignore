@@ -1,0 +1,12 @@
+*
+!*/
+
+!*.go
+!Dockerfile
+!go.mod
+!go.sum
+!*.md
+!/.gitignore
+!/.dockerignore
+!*.yaml
+!*.html
