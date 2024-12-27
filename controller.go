@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fake-ai-detective/config"
 	"html/template"
 	"net/http"
@@ -60,7 +61,12 @@ func handleStart(c *gin.Context) {
 	// 异步发送 POST 请求
 	go sendOpenAIRequest(url, key, traceID)
 
-	c.JSON(http.StatusOK, &StartResponse{Data: traceID})
+	startInfo := &StartInfo{
+		ID:    traceID,
+		Image: "data:image/png;base64," + base64.StdEncoding.EncodeToString(imgBytes),
+	}
+
+	c.JSON(http.StatusOK, &StartResponse{Data: startInfo})
 }
 
 func handleResult(c *gin.Context) {

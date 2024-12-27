@@ -55,7 +55,12 @@ type APIResponse[T any] struct {
 	Data    T      `json:"data,omitempty"`
 }
 
-type StartResponse APIResponse[string]
+type StartInfo struct {
+	ID    string `json:"id"`
+	Image string `json:"image"`
+}
+
+type StartResponse APIResponse[*StartInfo]
 
 type DetectResult struct {
 	Finished bool             `json:"finished"`

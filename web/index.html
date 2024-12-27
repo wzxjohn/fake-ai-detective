@@ -180,7 +180,7 @@
 
             const data = await response.json();
             if (data.data) {
-                currentId = data.data;
+                currentId = data.data.id;
                 startPolling(currentId);
             }
         } catch (error) {
