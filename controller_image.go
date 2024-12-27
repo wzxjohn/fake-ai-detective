@@ -29,7 +29,7 @@ func handleFakeImage(c *gin.Context) {
 	} else if IsFromCloudflare(ip) {
 		message += "IP 来自 Cloudflare, "
 	} else {
-		message += "IP 未知"
+		message += "IP 未知, "
 	}
 
 	userAgent := c.GetHeader("User-Agent")
@@ -45,6 +45,6 @@ func handleFakeImage(c *gin.Context) {
 
 	recordMessage(traceID, time.Now().Unix(), ip, c.GetHeader("User-Agent"), message, c.Request.Header)
 
-	// 返回 WebP 图片
-	c.Data(http.StatusOK, "image/webp", req.Image)
+	// 返回图片
+	c.Data(http.StatusOK, "image/png", req.Image)
 }
