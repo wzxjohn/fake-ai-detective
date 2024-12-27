@@ -39,7 +39,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: | 
-            wzxjohn/${{ env.IMAGE_NAME }}
+            ${{ env.IMAGE_NAME }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
