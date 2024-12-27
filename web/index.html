@@ -74,6 +74,19 @@
             cursor: not-allowed;
         }
 
+        .image-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
         .results-section {
             background: white;
             padding: 20px;
@@ -176,6 +189,10 @@
     </form>
 </div>
 
+<div id="image-section" class="image-section">
+    <!-- 动态插入图片 -->
+</div>
+
 <div class="results-section">
     <table>
         <thead>
@@ -224,6 +241,10 @@
             if (data.data) {
                 currentId = data.data.id;
                 startPolling(currentId);
+                // 如果返回有图片
+                if (data.data.image) {
+                    displayImage(data.data.image);
+                }
             }
         } catch (error) {
             console.error('Error:', error);
@@ -292,6 +313,14 @@
             tbody.appendChild(tr);
         });
     }
+
+    function displayImage(base64Image) {
+        // 更新图片内容
+        document.getElementById('image-section').innerHTML = `
+        <img src="${base64Image}" alt="返回的图片" style="max-width: 100%; height: auto; border-radius: 8px;">
+    `;
+    }
+
 </script>
 </body>
 </html>
