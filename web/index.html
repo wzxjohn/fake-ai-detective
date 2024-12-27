@@ -151,11 +151,32 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ccc;
+            border-top: 2px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body>
-<div style="background: #e3f2fd; padding: 12px; margin-bottom: 20px; border-radius: 8px;">OpenAI 官方公布了使用的 IP 段，请看<a href="https://platform.openai.com/docs/actions/production" style="color: #1976d2; text-decoration: none;">这篇文档</a>。
-</div>
+<div style="background: #e3f2fd; padding: 12px; margin-bottom: 10px; border-radius: 8px;">OpenAI 官方公布了使用的 IP 段，请看<a href="https://platform.openai.com/docs/actions/production" style="color: #1976d2; text-decoration: none;">这篇文档</a>。</div>
+<div style="background: #e3f2fd; padding: 12px; margin-bottom: 10px; border-radius: 8px;">NewAPI 对于 Google 和 Claude 中转会直接传递图片 Base64，因此只能检测中转次数。</div>
 <div class="input-section">
     <form id="requestForm">
         <div class="form-group">
@@ -185,7 +206,7 @@
                 <option value="gemini-1.5-pro-latest">gemini-1.5-pro-latest</option>
             </select>
         </div>
-        <button type="submit" id="submitBtn">提交</button>
+        <button type="submit" id="submitBtn">检测</button>
     </form>
 </div>
 
@@ -218,11 +239,7 @@
         e.preventDefault();
 
         const form = e.target;
-        const submitBtn = form.querySelector('button');
-        const inputs = form.querySelectorAll('input');
-
-        submitBtn.disabled = true;
-        inputs.forEach(input => input.disabled = true);
+        lockForm();
 
         try {
             const response = await fetch('{{ .APIPrefix }}/start', {
@@ -248,8 +265,7 @@
             }
         } catch (error) {
             console.error('Error:', error);
-            submitBtn.disabled = false;
-            inputs.forEach(input => input.disabled = false);
+            unlockForm()
         }
     });
 
@@ -273,6 +289,7 @@
 
                 if ((data.data) && (data.data.finished)) {
                     polling = false
+                    break
                 }
                 await new Promise(resolve => setTimeout(resolve, 2000));
             } catch (error) {
@@ -280,6 +297,8 @@
                 polling = false;
             }
         }
+
+        unlockForm()
     }
 
     function updateResults(results) {
@@ -319,6 +338,29 @@
         document.getElementById('image-section').innerHTML = `
         <img src="${base64Image}" alt="返回的图片" style="max-width: 100%; height: auto; border-radius: 8px;">
     `;
+    }
+    function lockForm() {
+        const form = document.getElementById('requestForm');
+        const submitBtn = form.querySelector('button');
+        const inputs = form.querySelectorAll('input, select');
+
+        submitBtn.disabled = true;
+        inputs.forEach(input => input.disabled = true);
+
+        // 更新提交按钮的文字和样式
+        submitBtn.innerHTML = `<span class="spinner"></span> 检测中`;
+    }
+
+    function unlockForm() {
+        const form = document.getElementById('requestForm');
+        const submitBtn = form.querySelector('button');
+        const inputs = form.querySelectorAll('input, select');
+
+        submitBtn.disabled = false;
+        inputs.forEach(input => input.disabled = false);
+
+        // 恢复提交按钮的文字
+        submitBtn.innerHTML = `检测`;
     }
 
 </script>
