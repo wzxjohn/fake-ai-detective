@@ -45,8 +45,9 @@ type ImageURL struct {
 }
 
 type StartRequest struct {
-	URL string `json:"url"`
-	Key string `json:"key"`
+	URL   string `json:"url"`
+	Key   string `json:"key"`
+	Model string `json:"model"`
 }
 
 type APIResponse[T any] struct {

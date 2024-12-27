@@ -12,7 +12,7 @@ var (
 	client = http.Client{Timeout: 120 * time.Second}
 )
 
-func sendOpenAIRequest(url string, key string, traceID string) {
+func sendOpenAIRequest(url, key, model string, traceID string) {
 	defer markFinished(traceID)
 	headers := map[string]string{
 		"Accept":        "",
@@ -23,7 +23,7 @@ func sendOpenAIRequest(url string, key string, traceID string) {
 
 	imageURL := baseURL + traceID
 	requestBody := OpenAIRequest{
-		Model: "gpt-4o",
+		Model: model,
 		Messages: []Message{
 			{
 				Role: "user",

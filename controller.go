@@ -33,9 +33,14 @@ func handleStart(c *gin.Context) {
 
 	url := strings.TrimSpace(startReq.URL)
 	key := strings.TrimSpace(startReq.Key)
+	model := strings.TrimSpace(startReq.Model)
 	if url == "" || key == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
 		return
+	}
+
+	if model == "" {
+		model = "gpt-4o"
 	}
 
 	traceID := uuid.NewString()
@@ -59,7 +64,7 @@ func handleStart(c *gin.Context) {
 	mutex.Unlock()
 
 	// 异步发送 POST 请求
-	go sendOpenAIRequest(url, key, traceID)
+	go sendOpenAIRequest(url, key, model, traceID)
 
 	startInfo := &StartInfo{
 		ID:    traceID,
