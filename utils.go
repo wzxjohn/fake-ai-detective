@@ -20,6 +20,14 @@ func recordMessage(traceID string, ts int64, ip, ua, message string, header http
 	}
 }
 
+func recordResponse(traceID, response string) {
+	mutex.Lock()
+	defer mutex.Unlock()
+	if req, exists := recordedIPs[traceID]; exists {
+		req.Response = response
+	}
+}
+
 func markFinished(traceID string) {
 	mutex.Lock()
 	defer mutex.Unlock()

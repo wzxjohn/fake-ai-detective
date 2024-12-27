@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"time"
 )
@@ -68,9 +70,16 @@ func sendOpenAIRequest(url, key, model string, traceID string) {
 	}
 	defer resp.Body.Close()
 
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("error while reading API response body:", err)
+	}
+
+	recordResponse(traceID, string(bodyBytes))
+
 	if resp.StatusCode != 200 {
-		recordMessage(traceID, time.Now().Unix(), "", "", fmt.Sprintf("Error: Status %d", resp.StatusCode), nil)
+		recordMessage(traceID, time.Now().Unix(), "", "", fmt.Sprintf("Error: Status %d", resp.StatusCode), resp.Header)
 	} else {
-		recordMessage(traceID, time.Now().Unix(), "", "", "API 响应结束，完成探测", nil)
+		recordMessage(traceID, time.Now().Unix(), "", "", "API 响应结束，完成探测", resp.Header)
 	}
 }

@@ -19,6 +19,7 @@ type TrackedRequest struct {
 	Image     []byte
 	Finished  bool
 	Results   []*TrackedResult
+	Response  string
 }
 
 // OpenAIRequest 结构体用于构造发送到 OpenAI 的请求
@@ -68,3 +69,5 @@ type DetectResult struct {
 	Results  []*TrackedResult `json:"results"`
 }
 type ResultResponse APIResponse[*DetectResult]
+
+type TargetResponse APIResponse[string]

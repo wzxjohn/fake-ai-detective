@@ -6,6 +6,18 @@
     <title>Fake AI Detective</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.7/dayjs.min.js"></script>
     <style>
+        .notice {
+            background: #e3f2fd;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+
+        a {
+            color: #1976d2;
+            text-decoration: none;
+        }
+
         body {
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
@@ -172,11 +184,26 @@
                 transform: rotate(360deg);
             }
         }
+
+        .target-result-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-align: left;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
     </style>
 </head>
 <body>
-<div style="background: #e3f2fd; padding: 12px; margin-bottom: 10px; border-radius: 8px;">OpenAI 官方公布了使用的 IP 段，请看<a href="https://platform.openai.com/docs/actions/production" style="color: #1976d2; text-decoration: none;">这篇文档</a>。</div>
-<div style="background: #e3f2fd; padding: 12px; margin-bottom: 10px; border-radius: 8px;">NewAPI 对于 Google 和 Claude 中转会直接传递图片 Base64，因此只能检测中转次数。</div>
+<div class="notice">OpenAI 官方公布了使用的 IP 段，请看<a
+        href="https://platform.openai.com/docs/actions/production">这篇文档</a>。
+</div>
+<div class="notice">NewAPI 对于 Google 和 Claude 中转会直接传递图片 Base64，因此只能检测中转次数。</div>
 <div class="input-section">
     <form id="requestForm">
         <div class="form-group">
@@ -231,6 +258,7 @@
     </table>
 </div>
 
+<div id="target-result-section" class="target-result-section"></div>
 <script>
     let polling = false;
     let currentId = null;
@@ -289,6 +317,9 @@
 
                 if ((data.data) && (data.data.finished)) {
                     polling = false
+
+                    // 获取并展示目标 API 的响应
+                    fetchAndDisplayResult(id);
                     break
                 }
                 await new Promise(resolve => setTimeout(resolve, 2000));
@@ -339,6 +370,7 @@
         <img src="${base64Image}" alt="返回的图片" style="max-width: 100%; height: auto; border-radius: 8px;">
     `;
     }
+
     function lockForm() {
         const form = document.getElementById('requestForm');
         const submitBtn = form.querySelector('button');
@@ -361,6 +393,38 @@
 
         // 恢复提交按钮的文字
         submitBtn.innerHTML = `检测`;
+    }
+
+    async function fetchAndDisplayResult(id) {
+        try {
+            const response = await fetch(`{{ .APIPrefix }}/response/${id}`);
+            const resultData = await response.json();
+
+            if (resultData.data) {
+                // 检查是否为 JSON 字符串
+                let parsedData;
+                try {
+                    parsedData = JSON.parse(resultData); // 将 JSON 字符串解析为对象
+                } catch (error) {
+                    console.error("Invalid JSON string:", resultData);
+                    parsedData = {error: "返回的响应不是有效的 JSON 格式。"};
+                }
+                // 调用展示函数
+                displayResult(parsedData);
+            } else {
+                displayResult({error: "响应为空"});
+            }
+        } catch (error) {
+            console.error('Error fetching result:', error);
+            displayResult({error: "无法获取结果，请稍后重试。"});
+        }
+    }
+
+    function displayResult(data) {
+        let resultContainer = document.getElementById('target-result-section');
+
+        // 将 JSON 格式化并展示
+        resultContainer.textContent = JSON.stringify(data, null, 2);
     }
 
 </script>

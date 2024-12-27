@@ -96,3 +96,22 @@ func handleResult(c *gin.Context) {
 		Results:  results,
 	}})
 }
+
+func handleResponse(c *gin.Context) {
+	traceID := c.Param("id")
+
+	mutex.RLock()
+	req, exists := recordedIPs[traceID]
+	mutex.RUnlock()
+
+	if !exists {
+		c.JSON(http.StatusOK, []string{})
+		return
+	}
+
+	mutex.RLock()
+	response := req.Response
+	mutex.RUnlock()
+
+	c.JSON(http.StatusOK, &TargetResponse{Data: response})
+}

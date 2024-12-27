@@ -51,6 +51,7 @@ func main() {
 	apiGroup := r.Group(cfg.APIPrefix)
 	apiGroup.POST("/start", handleStart)
 	apiGroup.GET("/result/:id", handleResult)
+	apiGroup.GET("/response/:id", handleResponse)
 
 	imgGroup := r.Group(cfg.ImagePrefix)
 	imgGroup.GET("/:id", handleFakeImage)
