@@ -6,6 +6,17 @@ Fake AI Detective is a tool to test your OpenAI like API channel.
 
 # Usage
 
+## Deploy
+
+Cloudflare CDN is recommended.
+
+### Docker Composer
+```
+wget https://raw.githubusercontent.com/wzxjohn/fake-ai-detective/refs/heads/master/docker-compose.yaml
+# Change DETECTIVE_DOMAIN env in config
+docker-compose up -d
+```
+
 ## Config environments
 
 ### `DETECTIVE_DOMAIN`
