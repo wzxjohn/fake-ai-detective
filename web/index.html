@@ -319,7 +319,7 @@
                     polling = false
 
                     // 获取并展示目标 API 的响应
-                    fetchAndDisplayResult(id);
+                    await fetchAndDisplayResult(id);
                     break
                 }
                 await new Promise(resolve => setTimeout(resolve, 2000));
@@ -404,7 +404,7 @@
                 // 检查是否为 JSON 字符串
                 let parsedData;
                 try {
-                    parsedData = JSON.parse(resultData); // 将 JSON 字符串解析为对象
+                    parsedData = JSON.parse(resultData.data); // 将 JSON 字符串解析为对象
                 } catch (error) {
                     console.error("Invalid JSON string:", resultData);
                     parsedData = {error: "返回的响应不是有效的 JSON 格式。"};
